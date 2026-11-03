@@ -1,43 +1,46 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
 import { SceneManager } from './sceneManager.js';
+
 let scene, camera, renderer, container, sceneManager;
 
 function setupThreeJs() {
-	container = document.getElementById('container3D');
+    container = document.getElementById('container3D');
 
-	renderer = new THREE.WebGLRenderer();
-	scene = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    scene = new THREE.Scene();
 
-	container.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
-	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-	camera.position.set(0, 6, 6);
-	camera.lookAt(0, 0, 0);
+    camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
 
-	const controls = new OrbitControls(camera, renderer.domElement);
-
-	window.addEventListener('resize', onResize);
-	onResize();
+    window.addEventListener('resize', onResize);
+    onResize();
 }
-
-
-
 
 function onResize() {
-	camera.aspect = container.offsetWidth / container.offsetHeight;
-	camera.updateProjectionMatrix();
+    if (!container || !renderer || !camera) return;
+    
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
 
-	renderer.setSize(container.offsetWidth, container.offsetHeight);
-}
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
 
-function animate() {
-	requestAnimationFrame(animate);
-	sceneManager.animate();
-	renderer.render(scene, camera);
+    renderer.setSize(width, height);
+
+    // Actualiza la relación de aspecto de las 6 cámaras en SceneManager
+    if (sceneManager && sceneManager.cameras) {
+        Object.values(sceneManager.cameras).forEach(cam => {
+            cam.aspect = width / height;
+            cam.updateProjectionMatrix();
+        });
+    }
 }
 
 setupThreeJs();
-sceneManager = new SceneManager(scene);
-animate();
+
+// Se pasan scene, camera y renderer para habilitar los controles y cámaras dinámicas
+sceneManager = new SceneManager(scene, camera, renderer);
+
+// SceneManager inicia su propio ciclo de animación internamente
+sceneManager.animate();

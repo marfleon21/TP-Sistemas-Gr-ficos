@@ -108,7 +108,7 @@ export function createGrua() {
     //Funciones de control
     return {
         mesh: gruaRoot,
-        
+        payloadAnchor: payloadAnchor,
         // Girar la grúa en Y 
         setRotation: (angulo) => {
             coronaGiratoriaGroup.rotation.y = angulo;
